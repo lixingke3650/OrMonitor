@@ -7,6 +7,7 @@
 #include <string.h>
 #include <sys/time.h>
 #include <time.h>
+#include <pthread.h>
 
 #include "utility.h"
 #include "logger.h"
@@ -17,6 +18,7 @@
 *********************************/
 static int LOG_LEVEL;
 static char LogFilePath[LOGFILEPATH_MAX];
+static pthread_mutex_t LogFileMutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /*********************************
@@ -76,7 +78,7 @@ void log_write(char* filepath, int logtype, char* msg)
 
     // 日志生成
     snprintf( record, LOGRECORD_MAX,
-             "%04d-%02d-%02d %02d:%02d:%02d.%03ld  %s  %s%s",
+             "[%04d-%02d-%02d %02d:%02d:%02d.%03ld]  [%s]  %s%s",
              w_time->tm_year + 1900,
              w_time->tm_mon + 1,
              w_time->tm_mday,
@@ -88,6 +90,8 @@ void log_write(char* filepath, int logtype, char* msg)
              msg,
              NEWLINE );
 
+    // IO互斥锁 锁定
+    pthread_mutex_lock(&LogFileMutex);
     // 写入文件
     fp = fopen( filepath, "ab" );
     if ( fp == NULL ){
@@ -95,6 +99,8 @@ void log_write(char* filepath, int logtype, char* msg)
     }
     fprintf( fp, "%s", record );
     fclose( fp );
+    // IO互斥锁 释放
+    pthread_mutex_unlock(&LogFileMutex);
 
     return;
 }

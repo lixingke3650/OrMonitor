@@ -11,7 +11,7 @@
 #include "itimer.h"
 
 struct  itimerval It_Time;        // 定时器启动间隔(itimerval)
-
+void (*callback)();
 
 /*********************************
  * 信号处理函数
@@ -20,7 +20,8 @@ void sigroutine(int sig)
 {
     switch (sig){
         case SIGALRM:
-            printf("<-sig-> SIGALRM\n");
+            // 
+            callback();
             break;
 
         default:
@@ -59,10 +60,13 @@ void itimer_init(int msec)
 /*********************************
  * 定时器开始
 *********************************/
-BOOL itimer_start(int msec)
+BOOL itimer_start(int msec, void (*routine) )
 {
     // 定时时间设定
     itimer_init(msec);
+
+    // 回调函数指定
+    callback = routine;
 
     // 信号处理注册
     signal(SIGALRM, sigroutine);
@@ -89,34 +93,3 @@ BOOL itimer_stop()
 
     return (TRUE);
 }
-
-/*********************************
- * 测试用主函数
-*********************************/
-/*
-int main(int argc, char* argv[])
-{
-    // itimerval结构体
-    // 定时时间
-    struct itimerval it_time;
-
-    // 每次定时开始时自动装载的定时时间
-    it_time.it_interval.tv_sec = 1;
-    it_time.it_interval.tv_usec = 0;
-    // 初始定时时间
-    it_time.it_value.tv_sec = 0;
-    it_time.it_value.tv_usec = 100000; // 0.1S
-
-    // 信号处理注册
-    signal(SIGALRM, sigroutine);
-
-    // 定时器启动
-    setitimer(ITIMER_REAL, &it_time, NULL);
-
-    // 无限循环等待信号
-    while (1)
-    {
-        sleep(10000);
-    }
-}
-*/

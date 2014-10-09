@@ -21,7 +21,7 @@
 /*********************************
  * 函数
 *********************************/
-BOOL itimer_start(int msec);
+BOOL itimer_start(int msec, void (*routine));
 BOOL itimer_stop();
 
 #endif // __ITIMER_H__

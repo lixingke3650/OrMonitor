@@ -33,7 +33,7 @@ void main(int arvc, char* argv[])
         return;
     }
 
-    if ( TRUE != itimer_start(cycle))
+    if ( TRUE != itimer_start(cycle, &routine))
     {
         log_err("itimer_start err!");
         return;
