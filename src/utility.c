@@ -4,8 +4,6 @@
 *********************************/
 
 #include <stdio.h>
-#include <signal.h>
-#include <sys/time.h>
 
 #include "utility.h"
 
@@ -35,4 +33,38 @@ int gcd(int lhs, int rhs)
     return (b);
 }
 
+/*********************************
+ * pid文件写入
+*********************************/
+BOOL setpidfile(char* filepath)
+{
+    if (filepath == NULL)
+    {
+        return (FALSE);
+    }
 
+    FILE *fp = NULL;
+
+    fp = fopen( filepath, "w" );
+    if ( fp == NULL )
+    {
+        // pid 文件创建写入失败
+        return (FALSE);
+    }
+    if ( 0 >= fprintf( fp, "%d\n", getpid() ) )
+    {
+        fclose( fp );
+        return (FALSE);
+    }
+
+    fclose( fp );
+    return (TRUE);
+}
+
+/*********************************
+ * 异常情况信息输出 通常用于log不可用时
+*********************************/
+void outcrash(char* msg)
+{
+    printf (msg);
+}

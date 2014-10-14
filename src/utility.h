@@ -26,9 +26,9 @@
 /*********************************
  * 函数
 *********************************/
-// utility.c
+void outcrash(char* msg);
 int gcd(int lhs, int rhs);
-
+BOOL setpidfile(char* filepath);
 
 #endif // __UTILITY_H__
 

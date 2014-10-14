@@ -11,9 +11,11 @@
 *********************************/
 #define LOG_PATH          "./ormonitor.log"
 #define CONF_PATH         "./ormonitor.conf"
-#define MONITLIST_PATH    "./ormonitorlist.conf"
+
+#define PIDFILE_PATH      "/var/run/ormonitor.pid"
 
 #define WAITTIME          (3600)    // 循环等待定时器 sleep时间 (s)
+
 
 /*********************************
  * 变量

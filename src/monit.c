@@ -22,13 +22,18 @@ void main(int arvc, char* argv[])
     int cycle = 0;  // 监视周期(ms)
     struct S_MonitObj* monitobj = NULL;
 
+    if ( TRUE != setpidfile(PIDFILE_PATH) )
+    {
+        // pid 文件写入失败
+        outcrash("setpidfile error.");
+
+        return;
+    }
+
     if ( TRUE != logger_init(LOG_PATH, LOG_DEBUG))
     {
         // log初始化失败
-
-        //>>>>>>>>>>>>>
-        printf("logger_init err!");
-        //<<<<<<<<<<<<<
+        outcrash("logger_init error.");
 
         return;
     }
