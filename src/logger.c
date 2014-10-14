@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <pthread.h>
+#include <stdarg.h>
 
 #include "utility.h"
 #include "logger.h"
@@ -19,7 +20,7 @@
 static int LOG_LEVEL;
 static char LogFilePath[LOGFILEPATH_MAX];
 static pthread_mutex_t LogFileMutex = PTHREAD_MUTEX_INITIALIZER;
-
+static char Record[LOGRECORD_MAX]; // 线程锁保护，同一时刻只有一个线程占用该内存，故可静态申请
 
 /*********************************
  * 初始化
@@ -27,7 +28,7 @@ static pthread_mutex_t LogFileMutex = PTHREAD_MUTEX_INITIALIZER;
 BOOL logger_init(char* filepath, int level)
 {
     FILE *fp = NULL;
-    
+
     if (level < LOG_LEVEL_MIN || level > LOG_LEVEL_MAX)
     {
         return (FALSE);
@@ -61,7 +62,6 @@ void log_write(char* filepath, int logtype, char* msg)
     struct tm *w_time;
     struct timeval tv;
     char logtypestr[LOGTYPESTR_MAX];
-    char record[LOGRECORD_MAX];
 
     // 日志标识字串
     switch (logtype)
@@ -92,7 +92,7 @@ void log_write(char* filepath, int logtype, char* msg)
     w_time = localtime( &tv.tv_sec );
 
     // 日志生成
-    snprintf( record, LOGRECORD_MAX,
+    snprintf( Record, LOGRECORD_MAX,
              "[%04d-%02d-%02d %02d:%02d:%02d.%03ld]  [%s]  %s%s",
              w_time->tm_year + 1900,
              w_time->tm_mon + 1,
@@ -112,7 +112,7 @@ void log_write(char* filepath, int logtype, char* msg)
     if ( fp == NULL ){
         return;
     }
-    fprintf( fp, "%s", record );
+    fprintf( fp, "%s", Record );
     fclose( fp );
     // IO互斥锁 释放
     pthread_mutex_unlock(&LogFileMutex);
@@ -123,12 +123,19 @@ void log_write(char* filepath, int logtype, char* msg)
 /*********************************
  * err 日志
 *********************************/
-void log_err(char* msg)
+void log_err(char* format, ...)
 {
     if (LOG_ERR > LOG_LEVEL)
     {
         return;
     }
+
+    va_list vl;                // 可变参数用
+    char msg[LOGRECORD_MAX];
+
+    va_start( vl, format );
+    vsnprintf( msg, LOGRECORD_MAX, format, vl );
+    va_end( vl );
 
     log_write(LogFilePath, LOG_ERR, msg);
 }
@@ -136,12 +143,19 @@ void log_err(char* msg)
 /*********************************
  * warn 日志
 *********************************/
-void log_wrn(char* msg)
+void log_wrn(char* format, ...)
 {
     if (LOG_WARN > LOG_LEVEL)
     {
         return;
     }
+
+    va_list vl;                // 可变参数用
+    char msg[LOGRECORD_MAX];
+
+    va_start( vl, format );
+    vsnprintf( msg, LOGRECORD_MAX, format, vl );
+    va_end( vl );
 
     log_write(LogFilePath, LOG_WARN, msg);
 }
@@ -149,25 +163,40 @@ void log_wrn(char* msg)
 /*********************************
  * info 日志
 *********************************/
-void log_inf(char* msg)
+void log_inf(char* format, ...)
 {
     if (LOG_INFO > LOG_LEVEL)
     {
         return;
     }
 
+    va_list vl;                // 可变参数用
+    char msg[LOGRECORD_MAX];
+
+    va_start( vl, format );
+    vsnprintf( msg, LOGRECORD_MAX, format, vl );
+    va_end( vl );
+
     log_write(LogFilePath, LOG_INFO, msg);
+
 }
 
 /*********************************
  * debug 日志
 *********************************/
-void log_dbg(char* msg)
+void log_dbg(char* format, ...)
 {
     if (LOG_DEBUG > LOG_LEVEL)
     {
         return;
     }
+
+    va_list vl;                // 可变参数用
+    char msg[LOGRECORD_MAX];
+
+    va_start( vl, format );
+    vsnprintf( msg, LOGRECORD_MAX, format, vl );
+    va_end( vl );
 
     log_write(LogFilePath, LOG_DEBUG, msg);
 }

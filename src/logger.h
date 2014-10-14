@@ -32,10 +32,10 @@
  * 函数
 *********************************/
 BOOL logger_init(char* filepath, int level);
-void log_err(char* msg);
-void log_wrn(char* msg);
-void log_inf(char* msg);
-void log_dbg(char* msg);
+void log_err(char* format, ...);
+void log_wrn(char* format, ...);
+void log_inf(char* format, ...);
+void log_dbg(char* format, ...);
 
 #endif // __LOGGER_H__
 

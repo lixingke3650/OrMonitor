@@ -49,7 +49,24 @@ BOOL proc_init(struct S_MonitObj* objlist, int* ocycle)
         return (FALSE);
     }
 
-    MonitObjHead = objlist;
+    struct S_MonitObj* tmp;
+
+    tmp = MonitObjHead = objlist;
+
+    // 监视对象列表
+    while(1)
+    {
+        log_inf("* name: %s", tmp->ProcObj.Name);
+        log_inf("* bin: %s", tmp->ProcObj.BinFilePath);
+        log_inf("* parame: %s", tmp->ProcObj.BinPrm);
+        log_inf("* pidfile: %s", tmp->ProcObj.PidFilePath);
+
+        if (tmp->pNext == NULL)
+        {
+            break;
+        }
+        tmp = tmp->pNext;
+    }
 
     if (TRUE != getItimer(&CycleGcd))
     {
@@ -130,6 +147,7 @@ int checkobj(struct S_MonitObj* mo)
     // 判断文件是否存在
     if ( 0 != access( mo->ProcObj.PidFilePath, 0 ) )
     {
+        log_inf("pid file [%s] not found.", mo->ProcObj.PidFilePath);
         return (1);
     }
 
@@ -144,10 +162,10 @@ int checkobj(struct S_MonitObj* mo)
     memset( linedata, 0x0, PID_LINE_MAX );
     fgets( linedata, PID_LINE_MAX, fp );
     fclose( fp );
-    // log_dbg(linedata);
+
     if ( (mo->ProcObj.Pid = atoi( linedata )) <= 0 )
     {
-        log_err("proc-checkobj-atoi err!");
+        log_err("proc-checkobj-atoi error.");
         return (-1);
     }
     //}
@@ -155,11 +173,11 @@ int checkobj(struct S_MonitObj* mo)
     // 判断pid指定进程是否存在
     if ( kill(mo->ProcObj.Pid, 0) != 0 )
     {
-        log_wrn("process no life!");
+        log_wrn("** [%s] process no life!", mo->ProcObj.Name);
         // 进程不存在，则删除pid文件
         if ( 0 != remove(mo->ProcObj.PidFilePath) )
         {
-            log_err("proc-checkobj-remove err!");
+            log_err("proc-checkobj-remove error.");
             return (-1);
         }
 
@@ -181,16 +199,12 @@ BOOL startobj(struct S_MonitObj* mo)
 
     snprintf(command, STARTCOMMAND_MAX, StartFormat, mo->ProcObj.PidFilePath, mo->ProcObj.BinFilePath, mo->ProcObj.BinPrm);
 
-    //>>
-    printf("command: %s\n", command);
-    //<<
-
     if ( 0 > system(command) )
     {
-        log_wrn("restart may fail.");
+        log_wrn("** [%s] restart may fail. ** command: %s", mo->ProcObj.Name, command);
     }
 
-    log_inf("restart success.");
+    log_inf("** [%s] restart success.", mo->ProcObj.Name);
 
     return (TRUE);
 }

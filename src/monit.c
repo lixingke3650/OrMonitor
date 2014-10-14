@@ -48,25 +48,24 @@ void main(int arvc, char* argv[])
     }
     log_inf("proc_init success.");
 
-    printf("cycle: %d\n", cycle);
-
     if ( TRUE != itimer_start(cycle, &routine))
     {
         log_err("itimer_start error.");
         goto enderr;
     }
-    log_inf("itimer_start success.");
+    log_inf("itimer_start success. **cycle: %d", cycle);
 
     // 启动成功 log
-    log_inf("** OrMonitor Start Success.");
+    log_inf("*** OrMonitor Start Success.");
 
     // 等待定时器
     while (1)
     {
         sleep(WAITTIME);
     }
+    return;
 
 enderr:
-    log_err("** OrMonitor Start fail.");
+    log_err("*** OrMonitor Start fail.");
     return;
 }

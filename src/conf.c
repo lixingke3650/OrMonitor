@@ -91,10 +91,6 @@ BOOL setconf(char* filepath, struct S_MonitObj** omolist)
             }
             else if (linedata[count_line] == ']')
             {
-                //>>>>>>>>>>>
-                printf("confproc: %s\n", confproc);
-                //<<<<<<<<<<<
-
                 target = 0;
 
                 // 监控对象准备
@@ -108,7 +104,7 @@ BOOL setconf(char* filepath, struct S_MonitObj** omolist)
                     if (count_Obj >= MONITOROBJ_MAX)
                     {
                         log_err("MONITOROBJ_MAX error.");
-                        close(fp);
+                        fclose(fp);
                         fp = NULL;
                         return (FALSE);
                     }
@@ -131,7 +127,7 @@ BOOL setconf(char* filepath, struct S_MonitObj** omolist)
             switch (target)
             {
                 case 0:
-                    continue;
+                    break;
 
                 // 项目名
                 case 1:
@@ -141,24 +137,27 @@ BOOL setconf(char* filepath, struct S_MonitObj** omolist)
                         confname[confnamecount] = linedata[count_line];
                         confnamecount ++;
                     }
-                    continue;
+                    break;
 
                 // 项目参数
                 case 2:
-                    confparam[confparamcount] = linedata[count_line];
-                    confparamcount ++;
-                    continue;
+                    // 项目参数起始空格去除
+                    if (linedata[count_line] != ' ' || confparamcount != 0)
+                    {
+                        confparam[confparamcount] = linedata[count_line];
+                        confparamcount ++;
+                    }
+                    break;
 
                 // 监控对象名
                 case 3:
                     confproc[confprocnamecount] = linedata[count_line];
                     confprocnamecount ++;
-                    continue;
+                    break;
 
                 default:
                     log_err("conf-setConf-switch error!");
-                    continue;
-                
+                    break;
             }
         }
 
@@ -170,47 +169,27 @@ BOOL setconf(char* filepath, struct S_MonitObj** omolist)
 
         if ( 0 == strcmp(CONF_NAME, confname) )
         {
-            //>>>>>>>>>>>
-            printf("confname: %s\n", confname);
-            printf("confparam: %s\n", confparam);
-            //<<<<<<<<<<<
             strcpy(tmpobj->ProcObj.Name, confparam);
         }
         else if ( 0 == strcmp(CONF_BIN, confname) )
         {
-            //>>>>>>>>>>>
-            printf("confname: %s\n", confname);
-            printf("confparam: %s\n", confparam);
-            //<<<<<<<<<<<
             strcpy(tmpobj->ProcObj.BinFilePath, confparam);
         }
         else if ( 0 == strcmp(CONF_PARAME, confname) )
         {
-            //>>>>>>>>>>>
-            printf("confname: %s\n", confname);
-            printf("confparam: %s\n", confparam);
-            //<<<<<<<<<<<
             strcpy(tmpobj->ProcObj.BinPrm, confparam);
         }
         else if ( 0 == strcmp(CONF_PIDFILE, confname) )
         {
-            //>>>>>>>>>>>
-            printf("confname: %s\n", confname);
-            printf("confparam: %s\n", confparam);
-            //<<<<<<<<<<<
             strcpy(tmpobj->ProcObj.PidFilePath, confparam);
         }
         else if ( 0 == strcmp(CONF_CYCLE, confname) )
         {
-            //>>>>>>>>>>>
-            printf("confname: %s\n", confname);
-            printf("confparam: %s\n", confparam);
-            //<<<<<<<<<<<
             tmpobj->ProcObj.Cycle = atoi(confparam);
         }
     }
 
-    close(fp);
+    fclose(fp);
     fp = NULL;
 
     if (tmpobj != NULL)
