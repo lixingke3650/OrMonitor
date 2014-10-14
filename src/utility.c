@@ -17,7 +17,7 @@ int gcd(int lhs, int rhs)
 {
     int a,b,c;
 
-    if (b == 0)
+    if (rhs == 0)
     {
         return (0);
     }

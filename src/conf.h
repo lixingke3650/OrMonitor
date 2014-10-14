@@ -7,6 +7,8 @@
 #define __CONF_H__
 
 
+#include <pthread.h>
+
 /*********************************
  * 定值
 *********************************/
@@ -54,8 +56,8 @@ struct S_MonitObj
 /*********************************
  * 函数
 *********************************/
-//bool setConf(struct S_MonitObj* head, struct S_MonitObj* buf);
-void freeMonitorObj();
+BOOL setconf(char* filepath, struct S_MonitObj** omolist);
+void freemonitorobj();
 
 
 #endif // __CONF_H__

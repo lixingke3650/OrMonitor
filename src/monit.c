@@ -8,6 +8,7 @@
 
 #include "utility.h"
 #include "logger.h"
+#include "conf.h"
 #include "proc.h"
 #include "itimer.h"
 #include "monit.h"
@@ -19,32 +20,53 @@
 void main(int arvc, char* argv[])
 {
     int cycle = 0;  // 监视周期(ms)
+    struct S_MonitObj* monitobj = NULL;
 
     if ( TRUE != logger_init(LOG_PATH, LOG_DEBUG))
     {
         // log初始化失败
-        //log_err("logger_init err!");
-        return;
-    }
 
-    if ( TRUE != proc_init(MONITLIST_PATH, &cycle))
-    {
-        log_err("proc_init err!");
+        //>>>>>>>>>>>>>
+        printf("logger_init err!");
+        //<<<<<<<<<<<<<
+
         return;
     }
+    log_inf("logger_init success.");
+
+    if ( TRUE != setconf(CONF_PATH, &monitobj) )
+    {
+        log_err("setconf error.");
+        goto enderr;
+    }
+    log_inf("setconf success.");
+
+    if ( TRUE != proc_init(monitobj, &cycle))
+    {
+        log_err("proc_init error.");
+        goto enderr;
+    }
+    log_inf("proc_init success.");
+
+    printf("cycle: %d\n", cycle);
 
     if ( TRUE != itimer_start(cycle, &routine))
     {
-        log_err("itimer_start err!");
-        return;
+        log_err("itimer_start error.");
+        goto enderr;
     }
+    log_inf("itimer_start success.");
 
     // 启动成功 log
-    log_inf("OrMonitor Start.");
+    log_inf("** OrMonitor Start Success.");
 
     // 等待定时器
     while (1)
     {
         sleep(WAITTIME);
     }
+
+enderr:
+    log_err("** OrMonitor Start fail.");
+    return;
 }

@@ -10,11 +10,13 @@
 /*********************************
  * 定值
 *********************************/
-#define u_int   unsigned int
+#define u_int       unsigned int
 
-#define BOOL    int
-#define TRUE    (1)
-#define FALSE   (0) 
+#define BOOL        int
+#define TRUE        (1)
+#define FALSE       (0) 
+
+#define NEWLINE     "\n"
 
 /*********************************
  * 变量

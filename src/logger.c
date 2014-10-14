@@ -26,6 +26,8 @@ static pthread_mutex_t LogFileMutex = PTHREAD_MUTEX_INITIALIZER;
 *********************************/
 BOOL logger_init(char* filepath, int level)
 {
+    FILE *fp = NULL;
+    
     if (level < LOG_LEVEL_MIN || level > LOG_LEVEL_MAX)
     {
         return (FALSE);
@@ -33,6 +35,19 @@ BOOL logger_init(char* filepath, int level)
 
     LOG_LEVEL = level;
     strcpy(LogFilePath, filepath);
+
+    // log init newline
+    // IO互斥锁 锁定
+    pthread_mutex_lock(&LogFileMutex);
+    // 写入文件
+    fp = fopen( filepath, "ab" );
+    if ( fp == NULL ){
+        return;
+    }
+    fprintf( fp, "\n\n" );
+    fclose( fp );
+    // IO互斥锁 释放
+    pthread_mutex_unlock(&LogFileMutex);
 
     return (TRUE);
 }

@@ -22,8 +22,6 @@
 #define LOG_LEVEL_MIN      (0)
 #define LOG_LEVEL_MAX      (3)
 
-#define NEWLINE            "\n"
-
 
 /*********************************
  * 变量

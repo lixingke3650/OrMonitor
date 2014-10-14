@@ -10,6 +10,7 @@
 
 #include "utility.h"
 #include "logger.h"
+#include "conf.h"
 #include "proc.h"
 
 
@@ -41,12 +42,14 @@ static struct S_MonitObj MonitObj[MONITOROBJ_MAX];
  *   [  /out]*ocycle  : 需要的定时器周期(routine认定的周期)
  *   [return]true/false
 *********************************/
-BOOL proc_init(char* filepath, int* ocycle)
+BOOL proc_init(struct S_MonitObj* objlist, int* ocycle)
 {
-    if (TRUE != getMonitorObjOfFile(filepath))
+    if (objlist == NULL)
     {
         return (FALSE);
     }
+
+    MonitObjHead = objlist;
 
     if (TRUE != getItimer(&CycleGcd))
     {
@@ -105,111 +108,8 @@ BOOL getItimer(int* cycle)
             *cycle = cycletmp;
             return (TRUE);
         }
-        
+
         cycletmp = gcd(tmp->pNext->ProcObj.Cycle, cycletmp);
-        tmp = tmp->pNext;
-    }
-
-    return (FALSE);
-}
-
-/*********************************
- * 监视配置文件读取
-*********************************/
-BOOL getMonitorObjOfFile(char* filepath)
-{
-// 静态申请，不需释放
-#ifndef D_PROC_OBJ
-    // 文件读取
-    // 
-
-    // 对象作成
-    strcpy(MonitObj[0].ProcObj.Name, "nginx");
-    strcpy(MonitObj[0].ProcObj.PidFilePath, "/usr/local/nginx/logs/nginx.pid");
-    strcpy(MonitObj[0].ProcObj.BinFilePath, "/usr/local/nginx/sbin/nginx");
-    strcpy(MonitObj[0].ProcObj.BinPrm, "");
-    MonitObj[0].ProcObj.Cycle = 5000;
-
-    strcpy(MonitObj[1].ProcObj.Name, "gunicorn");
-    strcpy(MonitObj[1].ProcObj.PidFilePath, "/var/run/gunicorn.pid");
-    strcpy(MonitObj[1].ProcObj.BinFilePath, "/usr/local/bin/gunicorn");
-    strcpy(MonitObj[1].ProcObj.BinPrm, "-c /usr/local/nginx/App/video/gunicorn.conf.py index:app");
-    MonitObj[1].ProcObj.Cycle = 2000;
-
-    // 登录
-    addMoniter(&MonitObj[0]);
-    addMoniter(&MonitObj[1]);
-
-// 动态申请内存存储监视对象，程序结束时请调用freeMonitorObj()释放
-#else
-    // 文件读取
-
-    // 对象申请
-
-    // 对象作成
-
-    // 登录
-
-#endif
-
-    return (TRUE);
-}
-
-/*********************************
- * 监视对象释放
-*********************************/
-void freeMonitorObj()
-{
-    struct S_MonitObj* tmp;
-    struct S_MonitObj* nexttmp;
-    tmp = MonitObjHead;
-
-    while (1)
-    {
-        if ( tmp == NULL )
-        {
-            return;
-        }
-
-        nexttmp = tmp->pNext;
-        free(tmp);
-        tmp = nexttmp;
-    }
-}
-
-/*********************************
- * 监视登录
-*********************************/
-BOOL addMoniter(struct S_MonitObj* po)
-{
-    struct S_MonitObj* tmp;
-
-    if (po == NULL)
-    {
-        return (FALSE);
-    }
-
-    //log_inf("");
-
-    po->pNext = NULL;
-    po->ProcObj.DownTime = po->ProcObj.Cycle;
-
-    // 初次添加
-    if (MonitObjHead == NULL)
-    {
-        MonitObjHead = po;
-        return (TRUE);
-    }
-
-    // 复数添加
-    tmp = MonitObjHead;
-    while (1)
-    {
-        if ( tmp->pNext == NULL)
-        {
-            tmp->pNext = po;
-            return (TRUE);
-        }
         tmp = tmp->pNext;
     }
 
@@ -280,6 +180,10 @@ BOOL startobj(struct S_MonitObj* mo)
     char command[STARTCOMMAND_MAX];
 
     snprintf(command, STARTCOMMAND_MAX, StartFormat, mo->ProcObj.PidFilePath, mo->ProcObj.BinFilePath, mo->ProcObj.BinPrm);
+
+    //>>
+    printf("command: %s\n", command);
+    //<<
 
     if ( 0 > system(command) )
     {
