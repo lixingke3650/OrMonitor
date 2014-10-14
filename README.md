@@ -10,7 +10,7 @@ Linux 程序监控工具
 #### 使用前提：  
 1. 已安装start-stop-daemon工具  
 2. 需指定监控进程的pid文件(若监控对象不生成，则由start-stop-daemon自动生成，请参考ormonitor.conf中的配置样例)  
-  (程序中默认使用了start-stop-daemon的 **-pidfile** 和 **-m** 参数)
+  (程序中默认使用了start-stop-daemon的 **-pidfile** 和 **-m** 参数,请注意监控对象是否自行生成pid文件及该文件路径)
 
 #### 执行原理：  
 1. 判断pid文件是否存在，不存在则认为监控对象未启动.重启.  
